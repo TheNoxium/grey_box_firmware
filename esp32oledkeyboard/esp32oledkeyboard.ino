@@ -10,6 +10,7 @@
 
 
 char key;
+char timer1ent;
 
 char keys[3][4] = {
   { '0', '8', '5', '2' },
@@ -29,13 +30,20 @@ Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, 3, 4);  //инииц�
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 void setup() {
   Serial.begin(115200);
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for (;;)
+      ;  // Don't proceed, loop forever
+  }
 }
 
 
 
 
 void loop() {
-  cleandisplay();
+
+
+
   char key = keypad.getKey();
 
   if (key != NO_KEY) {
@@ -45,23 +53,26 @@ void loop() {
       cleandisplay();
     }
 
-    if (key == '*') {
-      timer1();
-    }
+    
+      if (key == '*') {
+        timer1();
+      }
+      while (key == '*') {
+        timer1enter();
+      }
+    
+
     if (key == '#') {
       timer2();
     }
   }
 }
 
+
 void cleandisplay()
 
-{  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-    Serial.println(F("SSD1306 allocation failed"));
-    for (;;)
-      ;  // Don't proceed, loop forever
-  }
+{
+
   display.clearDisplay();
   display.setTextSize(2);
   display.setTextColor(WHITE);
@@ -80,6 +91,26 @@ void timer1()
   display.setTextColor(WHITE);
   display.setCursor(0, 0);
   display.println("Timer 1");
+  display.display();
+  delay(100);
+  display.clearDisplay();
+}
+
+
+void timer1enter() {
+  display.clearDisplay();
+  display.setTextSize(2);
+  display.setTextColor(WHITE);
+  display.setCursor(0, 0);
+  display.println("Timer 1");
+  display.display();
+  delay(100);
+  display.clearDisplay();
+  display.clearDisplay();
+  display.setTextSize(2);
+  display.setTextColor(WHITE);
+  display.setCursor(0, 25);
+  display.println("Time");
   display.display();
   delay(100);
   display.clearDisplay();
