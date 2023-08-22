@@ -39,7 +39,8 @@ void setup() {
   
 }
 void loop() {
- 
+ up = 0;
+ down = 0;
 
   char key = keypad.getKey();
 
@@ -50,13 +51,15 @@ void loop() {
 
   if (up == 1) {  
     pointer--; 
-     Serial.println("up");             
+     Serial.println("up"); 
+      if (pointer<0) pointer=0;           
      
   }
 
   if (down == 1) {
     pointer++;
      Serial.println("down");
+     if (pointer>2) pointer=2;   
     
   }
 
@@ -65,7 +68,8 @@ void loop() {
   oled.home();  // курсор в 0,0
   oled.print(F(
     "  Parameter 0:\n\r"  // Не забываем про '\n' - символ переноса строки
-    "  Parameter 1:\n\r"));
+    "  Parameter 1:\n\r"
+    "  Parameter 2:\n\r"));
   printPointer(pointer); 
   oled.update();
   
@@ -77,14 +81,14 @@ void keypadEvent(KeypadEvent key) {
       switch (key) {
         case '2':
           up = 1;
-          Serial.println(up);
-          delay(100);
+          Serial.println(up);   
+          
           break;
 
         case '8':
           down = 1;
           Serial.println(down);
-          delay(100);
+          
           break;
 
         case '5':
@@ -96,17 +100,17 @@ void keypadEvent(KeypadEvent key) {
     case RELEASED:
       switch (key) {
         case '2':
-          up = 0;
+         // up = 0;
           Serial.println(up);
           break;
 
         case '8':
-          down = 0;
+         // down = 0;
           Serial.println(down);
           break;
 
         case '5':
-          ok = 0;
+         // ok = 0;
           Serial.println(ok);
           break;
       }
