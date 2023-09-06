@@ -1,74 +1,4 @@
-#include <WiFi.h>
-
-const char* ssid = "PR1HOD1 NA BYH14";
-const char* password = "88888888q";
-const char* host = "192.168.0.110";
-
-unsigned long timer;
-
-#include "ArduinoJson.h"
-
-
-
-void setup() {
-  Serial.begin(115200);
-  delay(1000);
-  Serial.printf("Подключение к Wi-Fi сети %s ", ssid);
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println(" Модуль успешно подключен к Wi-Fi сети. ");
-}
-
-void loop() {
-
-  if (millis() - timer > 20000) {
-    timer = millis();
-    wificonnectdata();
-  }
-}
-
-
-void wificonnectdata() {
-  WiFiClient client;
-
-  Serial.printf("\n[Connecting to %s ... ", host);
-  if (client.connect(host, 80)) {
-    Serial.println("connected]");
-    client.print("GET /api/get_profile_list");
-    client.println(" HTTP/1.1");
-    client.print("Host: ");
-    client.println(host);
-    client.println("Connection: close");
-    client.println();
-    client.flush();
-
-
-    delay(200);
-
-    while (client.available()) {
-      String jsonString = client.readStringUntil('\n');
-      Serial.println(jsonString);
-
-      parseJSON(jsonString);
-
-    }
-
-    client.stop();
-    client.flush();
-    delay(50);
-  } else {
-    client.stop();
-    client.flush();
-    Serial.println("Ошибка подключения");
-    delay(1000);
-  }
-
-  Serial.println("Остановка подключения");
-}
-
+#include <ArduinoJson.h>
 
 void parseJSON(String jsonString) {
   // Размер буфера должен соответствовать размеру JSON пакета
@@ -124,4 +54,18 @@ void parseJSON(String jsonString) {
   delete[] ids;
   delete[] startTimes;
   delete[] endTimes;
+}
+
+
+
+void setup() {
+  Serial.begin(9600);
+
+  String jsonString = "{\"message\":\"get_profile_list received successfully\",\"profile_list\":[{\"id\":1,\"start_time\":1000,\"end_time\":2000},{\"id\":2,\"start_time\":1000,\"end_time\":2000},{\"id\":3,\"start_time\":1000,\"end_time\":2000}]}";
+
+  parseJSON(jsonString);
+}
+
+void loop() {
+  // Ваш код здесь
 }

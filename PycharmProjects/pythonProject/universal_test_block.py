@@ -135,4 +135,4 @@ sanic.blueprint(bp)
 
 
 if __name__ == '__main__':
-    sanic.run(host="0.0.0.0", port=8000)
+    sanic.run(host="192.168.0.110", port=80)
