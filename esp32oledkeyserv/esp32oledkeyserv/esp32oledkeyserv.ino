@@ -102,17 +102,23 @@ void loop() {
         // И все остальные
     }
   }
+  if (numProfilesmenu > 0) {
+    oled.home();
+    oled.clear(1, 64, 6, 1);
+    oled.print(F("Выберите профиль"));
+    printPointer(pointer);
+    oled.update();
+  } else {
+    oled.home();
+    oled.print(F("Соеденение с сервером"));
+    oled.update();
+  }
 
-  oled.home();
-  oled.clear(1, 64, 6, 1);
-  printPointer(pointer);
-  oled.update();
 
 
   if (millis() - timer > 10000) {
     timer = millis();
     wificonnectdata();
-
     Serial.print("numProfilesmenu :  ");
     Serial.println(numProfilesmenu);
   }
@@ -139,9 +145,6 @@ void wificonnectdata() {
     while (client.available()) {
       String jsonString = client.readStringUntil('\n');
       Serial.println(jsonString);
-
-      oled.clear();
-      oled.update();
 
       parseJSON(jsonString);
     }
@@ -207,6 +210,8 @@ void parseJSON(String jsonString) {
     Serial.print(", Время окончания=");
     Serial.println(endTimes[i]);
   }
+  oled.clear();
+  oled.update();
   for (int i = 0; i < numProfiles; i++) {
 
     oled.home();  // курсор в 0,0
