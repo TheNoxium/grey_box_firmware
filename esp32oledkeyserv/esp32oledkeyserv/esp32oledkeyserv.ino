@@ -6,10 +6,14 @@ const char* host = "192.168.0.110";
 
 unsigned long timer;
 
+byte flag;
+
 #include "ArduinoJson.h"
 
 int numProfiles;
 int numProfilesmenu;
+int numProfilesPointer;
+
 int* ids;
 int* startTimes;
 int* endTimes;
@@ -20,6 +24,7 @@ int endTimemenu[5];
 
 
 String message;
+String messagemenu;
 String jsonString;
 
 
@@ -81,17 +86,20 @@ void setup() {
 
 void loop() {
 
+
+
   up = 0;
   down = 0;
   ok = 0;
   back = 0;
+
   char key = keypad.getKey();
 
   if (key != NO_KEY) {
     Serial.println(key);
   }
 
-
+  
 
   if (up == 1) {
     pointer--;
@@ -100,23 +108,37 @@ void loop() {
 
   if (down == 1) {
     pointer++;
-    if (pointer > numProfilesmenu) pointer = numProfilesmenu;
+    if (pointer > numProfilesPointer) pointer = numProfilesPointer;
   }
 
   if (ok == 1) {              // Нажатие на ОК - переход в пункт меню
     switch (pointer) {        // По номеру указателей располагаем вложенные функции (можно вложенные меню)
-      case 2: func(); break;  // По нажатию на ОК при наведении на 0й пункт вызвать функцию
+      case 0: func();  break;  // По нажатию на ОК при наведении на 0й пункт вызвать функцию
+      case 1: break;
+      case 2: break;
       case 3: break;
-      case 4:
-        break;
+      case 4: break;
     }
   }
-  if (numProfilesmenu > 0) {
-    oled.home();
-    oled.clear(1, 64, 6, 1);
-    oled.print(F("Выберите профиль"));
-    printPointer(pointer);
-    oled.update();
+
+  if (back == 1) {             
+    switch (pointer) {         
+      case 2: func1();  break;  
+      case 3: break;
+      case 4: break;
+      case 5: break;
+      case 6: break;
+    }
+  }
+
+
+  if (numProfilesPointer > 0) {
+    if (flag == 1) {
+      oled.home();
+      oled.clear(1, 64, 6, 15);
+      printPointer(pointer);
+      oled.update();
+    }
   } else {
     oled.home();
     oled.print(F("Соеденение с сервером"));
@@ -128,17 +150,7 @@ void loop() {
   if (millis() - timer > 10000) {
     timer = millis();
     wificonnectdata();
-    Serial.print("numProfilesmenu :  ");
-    Serial.println(numProfilesmenu);
-   
-    Serial.print("ID - ");
-    Serial.println(idmenu[0]);
-    Serial.print("startTimemenu - ");
-    Serial.println(startTimemenu[0]);
-    Serial.print("endTimemenu - ");
-    Serial.println(endTimemenu[0]);
-    
-    
+    printMenu();
   }
 }
 
@@ -201,6 +213,9 @@ void parseJSON(String jsonString) {
   // Получаем значение простой записи
   String message = jsonBuffer["message"];
 
+  messagemenu = message;
+
+
   // Получаем массив записей
   JsonArray profileListArray = jsonBuffer["profile_list"];
 
@@ -218,8 +233,6 @@ void parseJSON(String jsonString) {
     endTimes[i] = profileListArray[i]["end_time"];
   }
 
-  Serial.print("Сообщение: ");
-  Serial.println(message);
 
 
   for (int i = 0; i < 5; i++) {
@@ -229,22 +242,55 @@ void parseJSON(String jsonString) {
     endTimemenu[i] = endTimes[i];
   }
 
- 
+
+  numProfilesPointer = numProfiles + 1;
+  numProfilesmenu = numProfiles;
+
+  // Освобождаем память, выделенную под динамические массивы
+  delete[] ids;
+  delete[] startTimes;
+  delete[] endTimes;
+}
+
+
+
+void printMenu() {
+
+  flag = 1;
+
+  Serial.print("Сообщение: ");
+  Serial.println(messagemenu);
+
+  Serial.print("numProfilesPointer :  ");
+  Serial.println(numProfilesPointer);
+
+  Serial.print("numProfilesmenu :  ");
+  Serial.println(numProfilesmenu);
+
+  Serial.print("numProfiles :  ");
+  Serial.println(numProfiles);
+
+
+  Serial.print("ID - ");
+  Serial.println(idmenu[0]);
+  Serial.print("startTimemenu - ");
+  Serial.println(startTimemenu[0]);
+  Serial.print("endTimemenu - ");
+  Serial.println(endTimemenu[0]);
 
 
 
 
 
-
-  for (int i = 0; i < numProfiles; i++) {
+  for (int i = 0; i < numProfilesmenu; i++) {
     Serial.print("Профиль ");
     Serial.print(i + 1);
     Serial.print(": ID=");
-    Serial.print(ids[i]);
+    Serial.print(idmenu[i]);
     Serial.print(", Время начала=");
-    Serial.print(startTimes[i]);
+    Serial.print(startTimemenu[i]);
     Serial.print(", Время окончания=");
-    Serial.println(endTimes[i]);
+    Serial.println(endTimemenu[i]);
     Serial.println(i);
   }
 
@@ -253,26 +299,51 @@ void parseJSON(String jsonString) {
 
   oled.clear();
   oled.update();
-  for (int i = 0; i < numProfiles; i++) {
+  for (int i = 0; i < numProfilesmenu; i++) {
 
-    oled.home();  // курсор в 0,0
-
+    oled.home();
+    oled.print(F("Выберите профиль"));
+    oled.setCursor(0, 1);
+    oled.print(messagemenu);
     oled.setCursor(8, i + 2);
     oled.print("Профиль  ");
     oled.print(i + 1);
     oled.print(": ID = ");
-    oled.println(ids[i]);
+    oled.println(idmenu[i]);
     oled.update();
   }
-
-  numProfilesmenu = numProfiles + 1;
-
-  // Освобождаем память, выделенную под динамические массивы
-  delete[] ids;
-  delete[] startTimes;
-  delete[] endTimes;
 }
 
+
+void func(void) {
+}
+
+void func1(void) {
+
+  flag = 0;
+
+  oled.clear();
+  oled.update();
+  oled.home();
+  oled.setCursor(10, 0);
+  oled.print(F("Press # to return"));
+  oled.setCursor(10, 1);
+  oled.print(F("Press * to save"));
+  oled.setCursor(10, 3);
+  oled.print(F("delete  profile?"));
+  oled.setCursor(10, 4);
+  oled.print(F("ID - "));
+  oled.setCursor(50, 4);
+  oled.print(idmenu[0]);
+  oled.update();
+}
+
+
+void printPointer(int pointer) {
+
+  oled.setCursor(0, pointer);
+  oled.print(">");
+}
 
 void keypadEvent(KeypadEvent key) {
   switch (keypad.getState()) {
@@ -290,7 +361,7 @@ void keypadEvent(KeypadEvent key) {
 
           break;
 
-        case '5':
+        case '*':
           ok = 1;
           Serial.println("ok");
 
@@ -298,7 +369,7 @@ void keypadEvent(KeypadEvent key) {
 
         case '#':
           back = 1;
-          Serial.println("Решетка");
+          Serial.println("back");
 
           break;
       }
@@ -327,13 +398,4 @@ void keypadEvent(KeypadEvent key) {
       }
       break;
   }
-}
-
-void printPointer(int pointer) {
-
-  oled.setCursor(0, pointer);
-  oled.print(">");
-}
-
-void func(void) {
 }
