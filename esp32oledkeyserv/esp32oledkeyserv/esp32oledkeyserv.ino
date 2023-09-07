@@ -8,11 +8,21 @@ unsigned long timer;
 
 #include "ArduinoJson.h"
 
+int numProfiles;
 int numProfilesmenu;
 int* ids;
 int* startTimes;
 int* endTimes;
+
+int idmenu[5];
+int startTimemenu[5];
+int endTimemenu[5];
+
+
 String message;
+String jsonString;
+
+
 
 
 #define OLED_SOFT_BUFFER_64
@@ -82,6 +92,7 @@ void loop() {
   }
 
 
+
   if (up == 1) {
     pointer--;
     if (pointer < 2) pointer = 2;
@@ -98,8 +109,6 @@ void loop() {
       case 3: break;
       case 4:
         break;
-
-        // И все остальные
     }
   }
   if (numProfilesmenu > 0) {
@@ -121,6 +130,15 @@ void loop() {
     wificonnectdata();
     Serial.print("numProfilesmenu :  ");
     Serial.println(numProfilesmenu);
+   
+    Serial.print("ID - ");
+    Serial.println(idmenu[0]);
+    Serial.print("startTimemenu - ");
+    Serial.println(startTimemenu[0]);
+    Serial.print("endTimemenu - ");
+    Serial.println(endTimemenu[0]);
+    
+    
   }
 }
 
@@ -192,14 +210,32 @@ void parseJSON(String jsonString) {
   int* startTimes = new int[numProfiles];
   int* endTimes = new int[numProfiles];
 
+
   // Читаем значения записей из массива
   for (int i = 0; i < numProfiles; i++) {
     ids[i] = profileListArray[i]["id"];
     startTimes[i] = profileListArray[i]["start_time"];
     endTimes[i] = profileListArray[i]["end_time"];
   }
+
   Serial.print("Сообщение: ");
   Serial.println(message);
+
+
+  for (int i = 0; i < 5; i++) {
+
+    idmenu[i] = ids[i];
+    startTimemenu[i] = startTimes[i];
+    endTimemenu[i] = endTimes[i];
+  }
+
+ 
+
+
+
+
+
+
   for (int i = 0; i < numProfiles; i++) {
     Serial.print("Профиль ");
     Serial.print(i + 1);
@@ -209,12 +245,18 @@ void parseJSON(String jsonString) {
     Serial.print(startTimes[i]);
     Serial.print(", Время окончания=");
     Serial.println(endTimes[i]);
+    Serial.println(i);
   }
+
+
+
+
   oled.clear();
   oled.update();
   for (int i = 0; i < numProfiles; i++) {
 
     oled.home();  // курсор в 0,0
+
     oled.setCursor(8, i + 2);
     oled.print("Профиль  ");
     oled.print(i + 1);
@@ -222,9 +264,9 @@ void parseJSON(String jsonString) {
     oled.println(ids[i]);
     oled.update();
   }
+
   numProfilesmenu = numProfiles + 1;
-  Serial.print("numProfiles :  ");
-  Serial.println(numProfiles);
+
   // Освобождаем память, выделенную под динамические массивы
   delete[] ids;
   delete[] startTimes;
