@@ -99,7 +99,7 @@ void loop() {
     Serial.println(key);
   }
 
-  
+
 
   if (up == 1) {
     pointer--;
@@ -113,7 +113,7 @@ void loop() {
 
   if (ok == 1) {              // Нажатие на ОК - переход в пункт меню
     switch (pointer) {        // По номеру указателей располагаем вложенные функции (можно вложенные меню)
-      case 0: func();  break;  // По нажатию на ОК при наведении на 0й пункт вызвать функцию
+      case 0: func(); break;  // По нажатию на ОК при наведении на 0й пункт вызвать функцию
       case 1: break;
       case 2: break;
       case 3: break;
@@ -121,9 +121,9 @@ void loop() {
     }
   }
 
-  if (back == 1) {             
-    switch (pointer) {         
-      case 2: func1();  break;  
+  if (back == 1) {
+    switch (pointer) {
+      case 2: func1(); break;
       case 3: break;
       case 4: break;
       case 5: break;
@@ -137,6 +137,7 @@ void loop() {
       oled.home();
       oled.clear(1, 64, 6, 15);
       printPointer(pointer);
+      
       oled.update();
     }
   } else {
@@ -331,11 +332,22 @@ void func1(void) {
   oled.print(F("Press * to save"));
   oled.setCursor(10, 3);
   oled.print(F("delete  profile?"));
-  oled.setCursor(10, 4);
+  oled.setCursor(20, 5);
   oled.print(F("ID - "));
-  oled.setCursor(50, 4);
+  oled.setCursor(50, 5);
   oled.print(idmenu[0]);
   oled.update();
+  while (1) {
+    char key = keypad.getKey();
+
+    if (key != NO_KEY) {
+      Serial.println(key);
+    }
+    if (key == '#') {
+      printMenu();
+      return;
+    }
+  }
 }
 
 
