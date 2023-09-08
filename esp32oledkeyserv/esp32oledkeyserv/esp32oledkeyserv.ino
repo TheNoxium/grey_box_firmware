@@ -27,6 +27,10 @@ String message;
 String messagemenu;
 String jsonString;
 
+#include <HTTPClient.h>
+
+const char* serverUrldelete = "http://192.168.0.110:80/api/remove_profile";
+
 
 
 
@@ -123,11 +127,11 @@ void loop() {
 
   if (back == 1) {
     switch (pointer) {
-      case 2: func1(); break;
-      case 3: break;
-      case 4: break;
-      case 5: break;
-      case 6: break;
+      case 2: delete0(); break;
+      case 3: delete1();break;
+      case 4: delete2();break;
+      case 5: delete3();break;
+      case 6: delete4();break;
     }
   }
 
@@ -137,7 +141,7 @@ void loop() {
       oled.home();
       oled.clear(1, 64, 6, 15);
       printPointer(pointer);
-      
+
       oled.update();
     }
   } else {
@@ -319,7 +323,7 @@ void printMenu() {
 void func(void) {
 }
 
-void func1(void) {
+void delete0(void) {
 
   flag = 0;
 
@@ -331,11 +335,11 @@ void func1(void) {
   oled.setCursor(10, 1);
   oled.print(F("Press * to save"));
   oled.setCursor(10, 3);
-  oled.print(F("delete  profile?"));
+  oled.print(F("Delete  profile?"));
   oled.setCursor(20, 5);
   oled.print(F("ID - "));
   oled.setCursor(50, 5);
-  oled.print(idmenu[0]);
+  oled.print(idmenu[pointer - 2]);
   oled.update();
   while (1) {
     char key = keypad.getKey();
@@ -347,14 +351,253 @@ void func1(void) {
       printMenu();
       return;
     }
+    if (key == '*') {
+      remove_profile();
+
+      while (1) {
+        char key = keypad.getKey();
+
+        if (key != NO_KEY) {
+          Serial.println(key);
+        }
+        if (key == '#') {
+
+          wificonnectdata();
+          printMenu();
+          return;
+        }
+      }
+    }
   }
 }
 
+void delete1(void) {
+
+  flag = 0;
+
+  oled.clear();
+  oled.update();
+  oled.home();
+  oled.setCursor(10, 0);
+  oled.print(F("Press # to return"));
+  oled.setCursor(10, 1);
+  oled.print(F("Press * to save"));
+  oled.setCursor(10, 3);
+  oled.print(F("Delete  profile?"));
+  oled.setCursor(20, 5);
+  oled.print(F("ID - "));
+  oled.setCursor(50, 5);
+  oled.print(idmenu[pointer - 2]);
+  oled.update();
+  while (1) {
+    char key = keypad.getKey();
+
+    if (key != NO_KEY) {
+      Serial.println(key);
+    }
+    if (key == '#') {
+      printMenu();
+      return;
+    }
+    if (key == '*') {
+      remove_profile();
+
+      while (1) {
+        char key = keypad.getKey();
+
+        if (key != NO_KEY) {
+          Serial.println(key);
+        }
+        if (key == '#') {
+          wificonnectdata();
+          printMenu();
+          return;
+        }
+      }
+    }
+  }
+}
+
+void delete2(void) {
+
+  flag = 0;
+
+  oled.clear();
+  oled.update();
+  oled.home();
+  oled.setCursor(10, 0);
+  oled.print(F("Press # to return"));
+  oled.setCursor(10, 1);
+  oled.print(F("Press * to save"));
+  oled.setCursor(10, 3);
+  oled.print(F("Delete  profile?"));
+  oled.setCursor(20, 5);
+  oled.print(F("ID - "));
+  oled.setCursor(50, 5);
+  oled.print(idmenu[pointer - 2]);
+  oled.update();
+  while (1) {
+    char key = keypad.getKey();
+
+    if (key != NO_KEY) {
+      Serial.println(key);
+    }
+    if (key == '#') {
+      printMenu();
+      return;
+    }
+    if (key == '*') {
+      remove_profile();
+
+      while (1) {
+        char key = keypad.getKey();
+
+        if (key != NO_KEY) {
+          Serial.println(key);
+        }
+        if (key == '#') {
+          wificonnectdata();
+          printMenu();
+          return;
+        }
+      }
+    }
+  }
+}
+
+void delete3(void) {
+
+  flag = 0;
+
+  oled.clear();
+  oled.update();
+  oled.home();
+  oled.setCursor(10, 0);
+  oled.print(F("Press # to return"));
+  oled.setCursor(10, 1);
+  oled.print(F("Press * to save"));
+  oled.setCursor(10, 3);
+  oled.print(F("Delete  profile?"));
+  oled.setCursor(20, 5);
+  oled.print(F("ID - "));
+  oled.setCursor(50, 5);
+  oled.print(idmenu[pointer - 2]);
+  oled.update();
+  while (1) {
+    char key = keypad.getKey();
+
+    if (key != NO_KEY) {
+      Serial.println(key);
+    }
+    if (key == '#') {
+      printMenu();
+      return;
+    }
+    if (key == '*') {
+      remove_profile();
+
+      while (1) {
+        char key = keypad.getKey();
+
+        if (key != NO_KEY) {
+          Serial.println(key);
+        }
+        if (key == '#') {
+          wificonnectdata();
+          printMenu();
+          return;
+        }
+      }
+    }
+  }
+}
+
+void delete4(void) {
+
+  flag = 0;
+
+  oled.clear();
+  oled.update();
+  oled.home();
+  oled.setCursor(10, 0);
+  oled.print(F("Press # to return"));
+  oled.setCursor(10, 1);
+  oled.print(F("Press * to save"));
+  oled.setCursor(10, 3);
+  oled.print(F("Delete  profile?"));
+  oled.setCursor(20, 5);
+  oled.print(F("ID - "));
+  oled.setCursor(50, 5);
+  oled.print(idmenu[pointer - 2]);
+  oled.update();
+  while (1) {
+    char key = keypad.getKey();
+
+    if (key != NO_KEY) {
+      Serial.println(key);
+    }
+    if (key == '#') {
+      printMenu();
+      return;
+    }
+    if (key == '*') {
+      remove_profile();
+
+      while (1) {
+        char key = keypad.getKey();
+
+        if (key != NO_KEY) {
+          Serial.println(key);
+        }
+        if (key == '#') {
+          wificonnectdata();
+          printMenu();
+          return;
+        }
+      }
+    }
+  }
+}
 
 void printPointer(int pointer) {
 
   oled.setCursor(0, pointer);
   oled.print(">");
+}
+
+void remove_profile() {
+
+  StaticJsonDocument<200> jsonDoc;
+  jsonDoc["id"] = idmenu[pointer - 2];
+  String jsonString;
+  serializeJson(jsonDoc, jsonString);
+
+
+  // Отправка DELETE-запроса на сервер
+  HTTPClient http;
+  http.begin(serverUrldelete);
+  http.addHeader("Content-Type", "application/json");
+
+  int httpResponseCode = http.sendRequest("DELETE", jsonString);
+
+  if (httpResponseCode > 0) {
+    String response = http.getString();
+    Serial.println("Server response: " + response);
+
+    
+    
+    oled.setCursor(10, 6);
+    oled.print("Server response: ");
+    oled.setCursor(10, 7);
+    oled.print(response);
+    oled.update();
+
+  } else {
+    Serial.println("Error sending DELETE request");
+  }
+
+  http.end();
+  pointer = 2;
 }
 
 void keypadEvent(KeypadEvent key) {
