@@ -115,23 +115,18 @@ void loop() {
     if (pointer > numProfilesPointer) pointer = numProfilesPointer;
   }
 
-  if (ok == 1) {              // Нажатие на ОК - переход в пункт меню
-    switch (pointer) {        // По номеру указателей располагаем вложенные функции (можно вложенные меню)
-      case 0: func(); break;  // По нажатию на ОК при наведении на 0й пункт вызвать функцию
-      case 1: break;
-      case 2: break;
-      case 3: break;
-      case 4: break;
-    }
+  if (ok == 1) {
+
+    func();
   }
 
   if (back == 1) {
     switch (pointer) {
       case 2: delete0(); break;
-      case 3: delete1();break;
-      case 4: delete2();break;
-      case 5: delete3();break;
-      case 6: delete4();break;
+      case 3: delete1(); break;
+      case 4: delete2(); break;
+      case 5: delete3(); break;
+      case 6: delete4(); break;
     }
   }
 
@@ -321,6 +316,51 @@ void printMenu() {
 
 
 void func(void) {
+
+  flag = 0;
+
+  oled.clear();
+  oled.update();
+  oled.home();
+  oled.setCursor(10, 0);
+  oled.print(F("Press # to return"));
+  oled.setCursor(10, 1);
+  oled.print(F("Press * to save"));
+  oled.setCursor(10, 3);
+  oled.print(F("ADD profile?"));
+  oled.setCursor(20, 5);
+
+  oled.update();
+  while (1) {
+    char key = keypad.getKey();
+
+    if (key != NO_KEY) {
+      Serial.println(key);
+    }
+    if (key == '#') {
+      printMenu();
+      back = 2;
+      break;
+    }
+    if (key == '*') {
+      //remove_profile();
+
+      while (1) {
+        char key = keypad.getKey();
+
+        if (key != NO_KEY) {
+          Serial.println(key);
+        }
+        if (key == '#') {
+          back = 2;
+          wificonnectdata();
+          printMenu();
+
+          break;
+        }
+      }
+    }
+  }
 }
 
 void delete0(void) {
@@ -584,8 +624,8 @@ void remove_profile() {
     String response = http.getString();
     Serial.println("Server response: " + response);
 
-    
-    
+
+
     oled.setCursor(10, 6);
     oled.print("Server response: ");
     oled.setCursor(10, 7);
