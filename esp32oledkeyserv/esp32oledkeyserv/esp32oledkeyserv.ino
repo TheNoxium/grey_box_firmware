@@ -30,6 +30,7 @@ String jsonString;
 #include <HTTPClient.h>
 
 const char* serverUrldelete = "http://192.168.0.110:80/api/remove_profile";
+const char* serverUrladd = "http://192.168.0.110:80/api/add_profile";
 
 
 
@@ -57,16 +58,16 @@ int up;
 int down;
 int ok;
 int back;
+int enter;
 int pointer;
 
-String str_hour = "";
-byte hour_lenght, j;
-unsigned long int_hour;
+String start_time = "";
+byte start_time_lenght, j;
+unsigned long int_start_time;
 
-String str_min = "";
-byte min_lenght, k;
-unsigned long int_min;
-
+String end_time = "";
+byte end_time_lenght, k;
+unsigned long int_end_time;
 
 
 void setup() {
@@ -104,6 +105,7 @@ void loop() {
   down = 0;
   ok = 0;
   back = 0;
+  enter = 0;
 
   char key = keypad.getKey();
 
@@ -125,7 +127,7 @@ void loop() {
 
   if (ok == 1) {
 
-    func();
+    add();
   }
 
   if (back == 1) {
@@ -135,6 +137,16 @@ void loop() {
       case 4: delete2(); break;
       case 5: delete3(); break;
       case 6: delete4(); break;
+    }
+  }
+
+  if (enter == 1) {
+    switch (pointer) {
+      case 2: modify0(); break;
+      case 3: ; break;
+      case 4: ; break;
+      case 5: ; break;
+      case 6: ; break;
     }
   }
 
@@ -322,10 +334,30 @@ void printMenu() {
   }
 }
 
+void modify0(void) {
 
-void func(void) {
+  oled.clear();
+  oled.update();
+  oled.home();
+  oled.setCursor(10, 0);
+  oled.print(F("Press # to return"));
+  oled.setCursor(10, 1);
+  oled.print(F("Press * to save"));
+  oled.setCursor(10, 3);
+  oled.print(F("ПОШЕЛ НАХУЙ"));
+  
+  oled.update();
+
+}
+
+void add(void) {
 
   flag = 0;
+
+  start_time = "";
+  end_time = "";
+  int_start_time = 1;
+  int_end_time = 1;
 
   oled.clear();
   oled.update();
@@ -338,15 +370,16 @@ void func(void) {
   oled.print(F("ADD profile?"));
   oled.setCursor(20, 5);
   oled.setCursor(0, 4);
-  oled.print(F("time"));
-  oled.setCursor(50, 4);
-  oled.print(int_hour);
+  oled.print(F("Start time:"));
   oled.setCursor(70, 4);
-  oled.print(int_min);
+  oled.print(int_start_time);
+  oled.setCursor(0, 5);
+  oled.print(F("End time:"));
+  oled.setCursor(70, 5);
+  oled.print(int_end_time);
   oled.update();
 
-  str_hour = "";
-  str_min = "";
+
 
   while (1) {
     char key = keypad.getKey();
@@ -365,19 +398,19 @@ void func(void) {
 
       if (key == '*') {
 
-        int_hour = str_hour.toInt();
-        hour_lenght = str_hour.length();
+        int_start_time = start_time.toInt();
+        start_time_lenght = start_time.length();
 
 
         Serial.println("Часы записаны");
-        Serial.println(int_hour);
+        Serial.println(int_start_time);
 
-        oled.setCursor(50, 4);
-        oled.print(int_hour);
+        oled.setCursor(70, 4);
+        oled.print(int_start_time);
 
 
-        oled.setCursor(30, 7);
-        oled.print(F("Hour saved!"));
+        oled.setCursor(0, 7);
+        oled.print(F("start time saved!"));
 
         oled.update();
 
@@ -390,22 +423,24 @@ void func(void) {
 
             if (key == '*') {
 
-              int_min = str_min.toInt();
-              min_lenght = str_min.length();
+              int_end_time = end_time.toInt();
+              end_time_lenght = end_time.length();
 
 
               Serial.println("минуты записаны");
-              Serial.println(int_min);
+              Serial.println(int_end_time);
 
 
 
-              oled.setCursor(70, 4);
-              oled.print(int_min);
+              oled.setCursor(70, 5);
+              oled.print(int_end_time);
 
-              oled.setCursor(30, 7);
-              oled.print(F("min saved!"));
+              oled.setCursor(0, 7);
+              oled.print(F("end_ime saved!"));
 
               oled.update();
+              delay(500);
+              add_profile();
 
               while (1) {
                 char key = keypad.getKey();
@@ -431,56 +466,58 @@ void func(void) {
             } else {
               Serial.println(key);
 
-              str_min += key;
-              int_min = str_min.toInt();
+              end_time += key;
+              int_end_time = end_time.toInt();
 
 
               oled.clear(1, 64, 127, 55);
-              oled.clear(70, 4 * 8, 80, 5 * 8);
+              oled.clear(70, 5 * 8, 127, 6 * 8);
               oled.update();
 
-              if (int_min > 60) {
+              if (int_end_time > 86400) {
 
                 oled.setCursor(10, 7);
                 oled.print(F("ERROR! min > 60 "));
                 Serial.println("ошибка");
                 oled.update();
-                str_min = "";
-                int_min = 1;
+                end_time = "";
+                int_end_time = 0;
                 delay(2000);
                 oled.clear(1, 64, 127, 55);
                 oled.update();
                 oled.setCursor(30, 7);
                 oled.print(F("Try again"));
-                oled.setCursor(50, 4);
-                oled.print(str_min);
+                oled.setCursor(70, 5);
+                oled.print(end_time);
                 oled.update();
                 Serial.println("повторнный ввод");
               }
-              if (int_min < 0) {
+
+              if (int_end_time < 0) {
 
                 oled.setCursor(10, 7);
-                oled.print(F("ERROR! min < 0"));
+                oled.print(F("ERROR! end time < 0 "));
                 Serial.println("ошибка");
                 oled.update();
-                str_min = "";
-                int_min = 1;
+                end_time = "";
+                int_end_time = 0;
                 delay(2000);
                 oled.clear(1, 64, 127, 55);
                 oled.update();
                 oled.setCursor(30, 7);
                 oled.print(F("Try again"));
-                oled.setCursor(50, 4);
-                oled.print(str_min);
+                oled.setCursor(70, 5);
+                oled.print(end_time);
                 oled.update();
                 Serial.println("повторнный ввод");
               }
 
-              Serial.print("минуты:");
-              Serial.println(int_min);
 
-              oled.setCursor(70, 4);
-              oled.print(int_min);
+              Serial.print("минуты:");
+              Serial.println(int_end_time);
+
+              oled.setCursor(70, 5);
+              oled.print(int_end_time);
 
               oled.update();
             }
@@ -488,67 +525,104 @@ void func(void) {
         }
 
       } else {
-        str_hour += key;
-        int_hour = str_hour.toInt();
+        start_time += key;
+        int_start_time = start_time.toInt();
 
 
 
 
         oled.clear(1, 64, 127, 55);
-        oled.clear(50, 4 * 8, 60, 5 * 8);
+        oled.clear(70, 4 * 8, 127, 5 * 8);
         oled.update();
 
 
 
-        if (int_hour > 24) {
+        if (int_start_time > 86400) {
 
           oled.setCursor(10, 7);
           oled.print(F("ERROR! time > 24 "));
           Serial.println("ошибка");
           oled.update();
-          str_hour = "";
-          int_hour = 1;
+          start_time = "";
+          int_start_time = 1;
           delay(2000);
           oled.clear(1, 64, 127, 55);
           oled.update();
           oled.setCursor(30, 7);
           oled.print(F("Try again"));
-          oled.setCursor(50, 4);
-          oled.print(str_hour);
+          oled.setCursor(70, 4);
+          oled.print(start_time);
           oled.update();
           Serial.println("повторнный ввод");
         }
-        if (int_hour < 1) {
+
+        if (int_start_time < 0) {
 
           oled.setCursor(10, 7);
-          oled.print(F("ERROR! time < 1 "));
+          oled.print(F("ERROR! start time < 0 "));
           Serial.println("ошибка");
           oled.update();
-          str_hour = "";
-          int_hour = 1;
+          start_time = "";
+          int_start_time = 1;
           delay(2000);
           oled.clear(1, 64, 127, 55);
           oled.update();
           oled.setCursor(30, 7);
           oled.print(F("Try again"));
-          oled.setCursor(50, 4);
-          oled.print(str_hour);
+          oled.setCursor(70, 4);
+          oled.print(start_time);
           oled.update();
           Serial.println("повторнный ввод");
         }
+
 
 
 
         Serial.print("часы:");
-        Serial.println(int_hour);
+        Serial.println(int_start_time);
 
-        oled.setCursor(50, 4);
-        oled.print(int_hour);
+        oled.setCursor(70, 4);
+        oled.print(int_start_time);
 
         oled.update();
       }
     }
   }
+}
+
+void add_profile() {
+
+  StaticJsonDocument<200> jsonDoc;
+  jsonDoc["start_time"] = int_start_time;
+  jsonDoc["end_time"] = int_end_time;
+  //jsonDoc["start_time"] = 1000;
+  // jsonDoc["end_time"] = 2000;
+
+  String jsonString;
+  serializeJson(jsonDoc, jsonString);
+  Serial.println(jsonString);
+  // Отправка POST-запроса на сервер
+  HTTPClient http;
+  http.begin(serverUrladd);
+  http.addHeader("Content-Type", "application/json");
+
+  int httpResponseCode = http.POST(jsonString);
+
+  if (httpResponseCode > 0) {
+    String response = http.getString();
+    Serial.println("Server response: " + response);
+
+    oled.setCursor(10, 6);
+    oled.print("Server response: ");
+    oled.setCursor(10, 7);
+    oled.print(response);
+    oled.update();
+
+  } else {
+    Serial.println("Error sending POST request");
+  }
+
+  http.end();
 }
 
 void delete0(void) {
@@ -853,6 +927,12 @@ void keypadEvent(KeypadEvent key) {
         case '#':
           back = 1;
           Serial.println("back");
+
+          break;
+
+        case '5':
+          enter = 1;
+          Serial.println("enter");
 
           break;
       }
