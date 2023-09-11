@@ -31,6 +31,7 @@ String jsonString;
 
 const char* serverUrldelete = "http://192.168.0.110:80/api/remove_profile";
 const char* serverUrladd = "http://192.168.0.110:80/api/add_profile";
+const char* serverUrlmodify = "http://192.168.0.110:80/api/modify_profile";
 
 
 
@@ -143,10 +144,10 @@ void loop() {
   if (enter == 1) {
     switch (pointer) {
       case 2: modify0(); break;
-      case 3: ; break;
-      case 4: ; break;
-      case 5: ; break;
-      case 6: ; break;
+      case 3: modify1(); break;
+      case 4: modify2(); break;
+      case 5: modify3(); break;
+      case 6: modify4(); break;
     }
   }
 
@@ -336,6 +337,14 @@ void printMenu() {
 
 void modify0(void) {
 
+  flag = 0;
+
+
+  start_time = "";
+  end_time = "";
+  int_start_time = 1;
+  int_end_time = 1;
+
   oled.clear();
   oled.update();
   oled.home();
@@ -343,12 +352,1310 @@ void modify0(void) {
   oled.print(F("Press # to return"));
   oled.setCursor(10, 1);
   oled.print(F("Press * to save"));
-  oled.setCursor(10, 3);
-  oled.print(F("ПОШЕЛ НАХУЙ"));
-  
+  oled.setCursor(0, 3);
+  oled.print(F("Profile ID : "));
+  oled.setCursor(70, 3);
+  oled.print(idmenu[pointer - 2]);
+  oled.setCursor(0, 4);
+  oled.print(F("Start time:"));
+  oled.setCursor(70, 4);
+  oled.print(startTimemenu[pointer - 2]);
+  oled.setCursor(0, 5);
+  oled.print(F("End time:"));
+  oled.setCursor(70, 5);
+  oled.print(endTimemenu[pointer - 2]);
   oled.update();
 
+
+  while (1) {
+    char key = keypad.getKey();
+
+
+
+
+
+    if (key != NO_KEY) {
+      Serial.println(key);
+
+
+
+      if (key == '#') {
+        printMenu();
+        wificonnectdata();
+        back = 2;
+
+        return;
+      }
+
+
+      if (key == '*') {
+
+        int_start_time = start_time.toInt();
+        start_time_lenght = start_time.length();
+
+
+        Serial.println("Часы записаны");
+        Serial.println(int_start_time);
+
+        oled.setCursor(70, 4);
+        oled.print(int_start_time);
+
+
+        oled.setCursor(0, 7);
+        oled.print(F("start time saved!"));
+
+        oled.update();
+
+
+        while (1) {
+          char key = keypad.getKey();
+
+          if (key != NO_KEY) {
+            Serial.println(key);
+
+
+            if (key == '*') {
+
+              int_end_time = end_time.toInt();
+              end_time_lenght = end_time.length();
+
+
+              Serial.println("минуты записаны");
+              Serial.println(int_end_time);
+
+
+
+              oled.setCursor(70, 5);
+              oled.print(int_end_time);
+
+              oled.setCursor(0, 7);
+              oled.print(F("end_ime saved!"));
+
+              oled.update();
+              delay(500);
+              modify_profile();
+
+              while (1) {
+                char key = keypad.getKey();
+
+                if (key != NO_KEY) {
+                  Serial.println(key);
+                }
+                if (key == '#') {
+                  printMenu();
+                  wificonnectdata();
+                  back = 2;
+                  return;
+                }
+              }
+            }
+
+            if (key == '#') {
+              printMenu();
+              wificonnectdata();
+              back = 2;
+              return;
+
+            } else {
+              Serial.println(key);
+
+              end_time += key;
+              int_end_time = end_time.toInt();
+
+
+              oled.clear(1, 64, 127, 55);
+              oled.clear(70, 5 * 8, 127, 6 * 8);
+              oled.update();
+
+              if (int_end_time > 86400) {
+
+                oled.setCursor(10, 7);
+                oled.print(F("ERROR! min > 60 "));
+                Serial.println("ошибка");
+                oled.update();
+                end_time = endTimemenu[pointer - 2];
+                int_end_time = endTimemenu[pointer - 2];
+                delay(2000);
+                oled.clear(1, 64, 127, 55);
+                oled.update();
+                oled.setCursor(30, 7);
+                oled.print(F("Try again"));
+                oled.setCursor(70, 5);
+                oled.print(end_time);
+                oled.update();
+                Serial.println("повторнный ввод");
+              }
+
+              if (int_end_time < 0) {
+
+                oled.setCursor(10, 7);
+                oled.print(F("ERROR! end time < 0 "));
+                Serial.println("ошибка");
+                oled.update();
+                end_time = endTimemenu[pointer - 2];
+                int_end_time = endTimemenu[pointer - 2];
+                delay(2000);
+                oled.clear(1, 64, 127, 55);
+                oled.update();
+                oled.setCursor(30, 7);
+                oled.print(F("Try again"));
+                oled.setCursor(70, 5);
+                oled.print(end_time);
+                oled.update();
+                Serial.println("повторнный ввод");
+              }
+
+
+              Serial.print("минуты:");
+              Serial.println(int_end_time);
+
+              oled.setCursor(70, 5);
+              oled.print(int_end_time);
+
+              oled.update();
+            }
+          }
+        }
+
+      } else {
+        start_time += key;
+        int_start_time = start_time.toInt();
+
+
+
+
+        oled.clear(1, 64, 127, 55);
+        oled.clear(70, 4 * 8, 127, 5 * 8);
+        oled.update();
+
+
+
+        if (int_start_time > 86400) {
+
+          oled.setCursor(10, 7);
+          oled.print(F("ERROR! time > 24 "));
+          Serial.println("ошибка");
+          oled.update();
+          start_time = startTimemenu[pointer - 2];
+          ;
+          int_start_time = startTimemenu[pointer - 2];
+          ;
+          delay(2000);
+          oled.clear(1, 64, 127, 55);
+          oled.update();
+          oled.setCursor(30, 7);
+          oled.print(F("Try again"));
+          oled.setCursor(70, 4);
+          oled.print(start_time);
+          oled.update();
+          Serial.println("повторнный ввод");
+        }
+
+        if (int_start_time < 0) {
+
+          oled.setCursor(10, 7);
+          oled.print(F("ERROR! start time < 0 "));
+          Serial.println("ошибка");
+          oled.update();
+          start_time = startTimemenu[pointer - 2];
+          ;
+          int_start_time = startTimemenu[pointer - 2];
+          ;
+          delay(2000);
+          oled.clear(1, 64, 127, 55);
+          oled.update();
+          oled.setCursor(30, 7);
+          oled.print(F("Try again"));
+          oled.setCursor(70, 4);
+          oled.print(start_time);
+          oled.update();
+          Serial.println("повторнный ввод");
+        }
+
+
+
+
+        Serial.print("часы:");
+        Serial.println(int_start_time);
+
+        oled.setCursor(70, 4);
+        oled.print(int_start_time);
+
+        oled.update();
+      }
+    }
+  }
 }
+
+void modify1(void) {
+
+  flag = 0;
+
+
+
+  // start_time = startTimemenu[pointer - 2];
+  //end_time = endTimemenu[pointer - 2];
+  // int_start_time = startTimemenu[pointer - 2];
+  //int_end_time = endTimemenu[pointer - 2];
+
+  start_time = "";
+  end_time = "";
+  int_start_time = 1;
+  int_end_time = 1;
+
+  oled.clear();
+  oled.update();
+  oled.home();
+  oled.setCursor(10, 0);
+  oled.print(F("Press # to return"));
+  oled.setCursor(10, 1);
+  oled.print(F("Press * to save"));
+  oled.setCursor(0, 3);
+  oled.print(F("Profile ID : "));
+  oled.setCursor(70, 3);
+  oled.print(idmenu[pointer - 2]);
+  oled.setCursor(0, 4);
+  oled.print(F("Start time:"));
+  oled.setCursor(70, 4);
+  oled.print(startTimemenu[pointer - 2]);
+  oled.setCursor(0, 5);
+  oled.print(F("End time:"));
+  oled.setCursor(70, 5);
+  oled.print(endTimemenu[pointer - 2]);
+  oled.update();
+
+
+  while (1) {
+    char key = keypad.getKey();
+
+
+
+
+
+    if (key != NO_KEY) {
+      Serial.println(key);
+
+
+
+      if (key == '#') {
+        printMenu();
+        wificonnectdata();
+        back = 2;
+
+        return;
+      }
+
+
+      if (key == '*') {
+
+        int_start_time = start_time.toInt();
+        start_time_lenght = start_time.length();
+
+
+        Serial.println("Часы записаны");
+        Serial.println(int_start_time);
+
+        oled.setCursor(70, 4);
+        oled.print(int_start_time);
+
+
+        oled.setCursor(0, 7);
+        oled.print(F("start time saved!"));
+
+        oled.update();
+
+
+        while (1) {
+          char key = keypad.getKey();
+
+          if (key != NO_KEY) {
+            Serial.println(key);
+
+
+            if (key == '*') {
+
+              int_end_time = end_time.toInt();
+              end_time_lenght = end_time.length();
+
+
+              Serial.println("минуты записаны");
+              Serial.println(int_end_time);
+
+
+
+              oled.setCursor(70, 5);
+              oled.print(int_end_time);
+
+              oled.setCursor(0, 7);
+              oled.print(F("end_ime saved!"));
+
+              oled.update();
+              delay(500);
+              modify_profile();
+
+              while (1) {
+                char key = keypad.getKey();
+
+                if (key != NO_KEY) {
+                  Serial.println(key);
+                }
+                if (key == '#') {
+                  printMenu();
+                  wificonnectdata();
+                  back = 2;
+                  return;
+                }
+              }
+            }
+
+            if (key == '#') {
+              printMenu();
+              wificonnectdata();
+              back = 2;
+              return;
+
+            } else {
+              Serial.println(key);
+
+              end_time += key;
+              int_end_time = end_time.toInt();
+
+
+              oled.clear(1, 64, 127, 55);
+              oled.clear(70, 5 * 8, 127, 6 * 8);
+              oled.update();
+
+              if (int_end_time > 86400) {
+
+                oled.setCursor(10, 7);
+                oled.print(F("ERROR! min > 60 "));
+                Serial.println("ошибка");
+                oled.update();
+                end_time = endTimemenu[pointer - 2];
+                int_end_time = endTimemenu[pointer - 2];
+                delay(2000);
+                oled.clear(1, 64, 127, 55);
+                oled.update();
+                oled.setCursor(30, 7);
+                oled.print(F("Try again"));
+                oled.setCursor(70, 5);
+                oled.print(end_time);
+                oled.update();
+                Serial.println("повторнный ввод");
+              }
+
+              if (int_end_time < 0) {
+
+                oled.setCursor(10, 7);
+                oled.print(F("ERROR! end time < 0 "));
+                Serial.println("ошибка");
+                oled.update();
+                end_time = endTimemenu[pointer - 2];
+                int_end_time = endTimemenu[pointer - 2];
+                delay(2000);
+                oled.clear(1, 64, 127, 55);
+                oled.update();
+                oled.setCursor(30, 7);
+                oled.print(F("Try again"));
+                oled.setCursor(70, 5);
+                oled.print(end_time);
+                oled.update();
+                Serial.println("повторнный ввод");
+              }
+
+
+              Serial.print("минуты:");
+              Serial.println(int_end_time);
+
+              oled.setCursor(70, 5);
+              oled.print(int_end_time);
+
+              oled.update();
+            }
+          }
+        }
+
+      } else {
+        start_time += key;
+        int_start_time = start_time.toInt();
+
+
+
+
+        oled.clear(1, 64, 127, 55);
+        oled.clear(70, 4 * 8, 127, 5 * 8);
+        oled.update();
+
+
+
+        if (int_start_time > 86400) {
+
+          oled.setCursor(10, 7);
+          oled.print(F("ERROR! time > 24 "));
+          Serial.println("ошибка");
+          oled.update();
+          start_time = startTimemenu[pointer - 2];
+          ;
+          int_start_time = startTimemenu[pointer - 2];
+          ;
+          delay(2000);
+          oled.clear(1, 64, 127, 55);
+          oled.update();
+          oled.setCursor(30, 7);
+          oled.print(F("Try again"));
+          oled.setCursor(70, 4);
+          oled.print(start_time);
+          oled.update();
+          Serial.println("повторнный ввод");
+        }
+
+        if (int_start_time < 0) {
+
+          oled.setCursor(10, 7);
+          oled.print(F("ERROR! start time < 0 "));
+          Serial.println("ошибка");
+          oled.update();
+          start_time = startTimemenu[pointer - 2];
+          ;
+          int_start_time = startTimemenu[pointer - 2];
+          ;
+          delay(2000);
+          oled.clear(1, 64, 127, 55);
+          oled.update();
+          oled.setCursor(30, 7);
+          oled.print(F("Try again"));
+          oled.setCursor(70, 4);
+          oled.print(start_time);
+          oled.update();
+          Serial.println("повторнный ввод");
+        }
+
+
+
+
+        Serial.print("часы:");
+        Serial.println(int_start_time);
+
+        oled.setCursor(70, 4);
+        oled.print(int_start_time);
+
+        oled.update();
+      }
+    }
+  }
+}
+
+void modify2(void) {
+
+  flag = 0;
+
+
+
+  // start_time = startTimemenu[pointer - 2];
+  //end_time = endTimemenu[pointer - 2];
+  // int_start_time = startTimemenu[pointer - 2];
+  //int_end_time = endTimemenu[pointer - 2];
+
+  start_time = "";
+  end_time = "";
+  int_start_time = 1;
+  int_end_time = 1;
+
+  oled.clear();
+  oled.update();
+  oled.home();
+  oled.setCursor(10, 0);
+  oled.print(F("Press # to return"));
+  oled.setCursor(10, 1);
+  oled.print(F("Press * to save"));
+  oled.setCursor(0, 3);
+  oled.print(F("Profile ID : "));
+  oled.setCursor(70, 3);
+  oled.print(idmenu[pointer - 2]);
+  oled.setCursor(0, 4);
+  oled.print(F("Start time:"));
+  oled.setCursor(70, 4);
+  oled.print(startTimemenu[pointer - 2]);
+  oled.setCursor(0, 5);
+  oled.print(F("End time:"));
+  oled.setCursor(70, 5);
+  oled.print(endTimemenu[pointer - 2]);
+  oled.update();
+
+
+  while (1) {
+    char key = keypad.getKey();
+
+
+
+
+
+    if (key != NO_KEY) {
+      Serial.println(key);
+
+
+
+      if (key == '#') {
+        printMenu();
+        wificonnectdata();
+        back = 2;
+
+        return;
+      }
+
+
+      if (key == '*') {
+
+        int_start_time = start_time.toInt();
+        start_time_lenght = start_time.length();
+
+
+        Serial.println("Часы записаны");
+        Serial.println(int_start_time);
+
+        oled.setCursor(70, 4);
+        oled.print(int_start_time);
+
+
+        oled.setCursor(0, 7);
+        oled.print(F("start time saved!"));
+
+        oled.update();
+
+
+        while (1) {
+          char key = keypad.getKey();
+
+          if (key != NO_KEY) {
+            Serial.println(key);
+
+
+            if (key == '*') {
+
+              int_end_time = end_time.toInt();
+              end_time_lenght = end_time.length();
+
+
+              Serial.println("минуты записаны");
+              Serial.println(int_end_time);
+
+
+
+              oled.setCursor(70, 5);
+              oled.print(int_end_time);
+
+              oled.setCursor(0, 7);
+              oled.print(F("end_ime saved!"));
+
+              oled.update();
+              delay(500);
+              modify_profile();
+
+              while (1) {
+                char key = keypad.getKey();
+
+                if (key != NO_KEY) {
+                  Serial.println(key);
+                }
+                if (key == '#') {
+                  printMenu();
+                  wificonnectdata();
+                  back = 2;
+                  return;
+                }
+              }
+            }
+
+            if (key == '#') {
+              printMenu();
+              wificonnectdata();
+              back = 2;
+              return;
+
+            } else {
+              Serial.println(key);
+
+              end_time += key;
+              int_end_time = end_time.toInt();
+
+
+              oled.clear(1, 64, 127, 55);
+              oled.clear(70, 5 * 8, 127, 6 * 8);
+              oled.update();
+
+              if (int_end_time > 86400) {
+
+                oled.setCursor(10, 7);
+                oled.print(F("ERROR! min > 60 "));
+                Serial.println("ошибка");
+                oled.update();
+                end_time = endTimemenu[pointer - 2];
+                int_end_time = endTimemenu[pointer - 2];
+                delay(2000);
+                oled.clear(1, 64, 127, 55);
+                oled.update();
+                oled.setCursor(30, 7);
+                oled.print(F("Try again"));
+                oled.setCursor(70, 5);
+                oled.print(end_time);
+                oled.update();
+                Serial.println("повторнный ввод");
+              }
+
+              if (int_end_time < 0) {
+
+                oled.setCursor(10, 7);
+                oled.print(F("ERROR! end time < 0 "));
+                Serial.println("ошибка");
+                oled.update();
+                end_time = endTimemenu[pointer - 2];
+                int_end_time = endTimemenu[pointer - 2];
+                delay(2000);
+                oled.clear(1, 64, 127, 55);
+                oled.update();
+                oled.setCursor(30, 7);
+                oled.print(F("Try again"));
+                oled.setCursor(70, 5);
+                oled.print(end_time);
+                oled.update();
+                Serial.println("повторнный ввод");
+              }
+
+
+              Serial.print("минуты:");
+              Serial.println(int_end_time);
+
+              oled.setCursor(70, 5);
+              oled.print(int_end_time);
+
+              oled.update();
+            }
+          }
+        }
+
+      } else {
+        start_time += key;
+        int_start_time = start_time.toInt();
+
+
+
+
+        oled.clear(1, 64, 127, 55);
+        oled.clear(70, 4 * 8, 127, 5 * 8);
+        oled.update();
+
+
+
+        if (int_start_time > 86400) {
+
+          oled.setCursor(10, 7);
+          oled.print(F("ERROR! time > 24 "));
+          Serial.println("ошибка");
+          oled.update();
+          start_time = startTimemenu[pointer - 2];
+          ;
+          int_start_time = startTimemenu[pointer - 2];
+          ;
+          delay(2000);
+          oled.clear(1, 64, 127, 55);
+          oled.update();
+          oled.setCursor(30, 7);
+          oled.print(F("Try again"));
+          oled.setCursor(70, 4);
+          oled.print(start_time);
+          oled.update();
+          Serial.println("повторнный ввод");
+        }
+
+        if (int_start_time < 0) {
+
+          oled.setCursor(10, 7);
+          oled.print(F("ERROR! start time < 0 "));
+          Serial.println("ошибка");
+          oled.update();
+          start_time = startTimemenu[pointer - 2];
+          ;
+          int_start_time = startTimemenu[pointer - 2];
+          ;
+          delay(2000);
+          oled.clear(1, 64, 127, 55);
+          oled.update();
+          oled.setCursor(30, 7);
+          oled.print(F("Try again"));
+          oled.setCursor(70, 4);
+          oled.print(start_time);
+          oled.update();
+          Serial.println("повторнный ввод");
+        }
+
+
+
+
+        Serial.print("часы:");
+        Serial.println(int_start_time);
+
+        oled.setCursor(70, 4);
+        oled.print(int_start_time);
+
+        oled.update();
+      }
+    }
+  }
+}
+
+void modify3(void) {
+
+  flag = 0;
+
+
+
+  // start_time = startTimemenu[pointer - 2];
+  //end_time = endTimemenu[pointer - 2];
+  // int_start_time = startTimemenu[pointer - 2];
+  //int_end_time = endTimemenu[pointer - 2];
+
+  start_time = "";
+  end_time = "";
+  int_start_time = 1;
+  int_end_time = 1;
+
+  oled.clear();
+  oled.update();
+  oled.home();
+  oled.setCursor(10, 0);
+  oled.print(F("Press # to return"));
+  oled.setCursor(10, 1);
+  oled.print(F("Press * to save"));
+  oled.setCursor(0, 3);
+  oled.print(F("Profile ID : "));
+  oled.setCursor(70, 3);
+  oled.print(idmenu[pointer - 2]);
+  oled.setCursor(0, 4);
+  oled.print(F("Start time:"));
+  oled.setCursor(70, 4);
+  oled.print(startTimemenu[pointer - 2]);
+  oled.setCursor(0, 5);
+  oled.print(F("End time:"));
+  oled.setCursor(70, 5);
+  oled.print(endTimemenu[pointer - 2]);
+  oled.update();
+
+
+  while (1) {
+    char key = keypad.getKey();
+
+
+
+
+
+    if (key != NO_KEY) {
+      Serial.println(key);
+
+
+
+      if (key == '#') {
+        printMenu();
+        wificonnectdata();
+        back = 2;
+
+        return;
+      }
+
+
+      if (key == '*') {
+
+        int_start_time = start_time.toInt();
+        start_time_lenght = start_time.length();
+
+
+        Serial.println("Часы записаны");
+        Serial.println(int_start_time);
+
+        oled.setCursor(70, 4);
+        oled.print(int_start_time);
+
+
+        oled.setCursor(0, 7);
+        oled.print(F("start time saved!"));
+
+        oled.update();
+
+
+        while (1) {
+          char key = keypad.getKey();
+
+          if (key != NO_KEY) {
+            Serial.println(key);
+
+
+            if (key == '*') {
+
+              int_end_time = end_time.toInt();
+              end_time_lenght = end_time.length();
+
+
+              Serial.println("минуты записаны");
+              Serial.println(int_end_time);
+
+
+
+              oled.setCursor(70, 5);
+              oled.print(int_end_time);
+
+              oled.setCursor(0, 7);
+              oled.print(F("end_ime saved!"));
+
+              oled.update();
+              delay(500);
+              modify_profile();
+
+              while (1) {
+                char key = keypad.getKey();
+
+                if (key != NO_KEY) {
+                  Serial.println(key);
+                }
+                if (key == '#') {
+                  printMenu();
+                  wificonnectdata();
+                  back = 2;
+                  return;
+                }
+              }
+            }
+
+            if (key == '#') {
+              printMenu();
+              wificonnectdata();
+              back = 2;
+              return;
+
+            } else {
+              Serial.println(key);
+
+              end_time += key;
+              int_end_time = end_time.toInt();
+
+
+              oled.clear(1, 64, 127, 55);
+              oled.clear(70, 5 * 8, 127, 6 * 8);
+              oled.update();
+
+              if (int_end_time > 86400) {
+
+                oled.setCursor(10, 7);
+                oled.print(F("ERROR! min > 60 "));
+                Serial.println("ошибка");
+                oled.update();
+                end_time = endTimemenu[pointer - 2];
+                int_end_time = endTimemenu[pointer - 2];
+                delay(2000);
+                oled.clear(1, 64, 127, 55);
+                oled.update();
+                oled.setCursor(30, 7);
+                oled.print(F("Try again"));
+                oled.setCursor(70, 5);
+                oled.print(end_time);
+                oled.update();
+                Serial.println("повторнный ввод");
+              }
+
+              if (int_end_time < 0) {
+
+                oled.setCursor(10, 7);
+                oled.print(F("ERROR! end time < 0 "));
+                Serial.println("ошибка");
+                oled.update();
+                end_time = endTimemenu[pointer - 2];
+                int_end_time = endTimemenu[pointer - 2];
+                delay(2000);
+                oled.clear(1, 64, 127, 55);
+                oled.update();
+                oled.setCursor(30, 7);
+                oled.print(F("Try again"));
+                oled.setCursor(70, 5);
+                oled.print(end_time);
+                oled.update();
+                Serial.println("повторнный ввод");
+              }
+
+
+              Serial.print("минуты:");
+              Serial.println(int_end_time);
+
+              oled.setCursor(70, 5);
+              oled.print(int_end_time);
+
+              oled.update();
+            }
+          }
+        }
+
+      } else {
+        start_time += key;
+        int_start_time = start_time.toInt();
+
+
+
+
+        oled.clear(1, 64, 127, 55);
+        oled.clear(70, 4 * 8, 127, 5 * 8);
+        oled.update();
+
+
+
+        if (int_start_time > 86400) {
+
+          oled.setCursor(10, 7);
+          oled.print(F("ERROR! time > 24 "));
+          Serial.println("ошибка");
+          oled.update();
+          start_time = startTimemenu[pointer - 2];
+          ;
+          int_start_time = startTimemenu[pointer - 2];
+          ;
+          delay(2000);
+          oled.clear(1, 64, 127, 55);
+          oled.update();
+          oled.setCursor(30, 7);
+          oled.print(F("Try again"));
+          oled.setCursor(70, 4);
+          oled.print(start_time);
+          oled.update();
+          Serial.println("повторнный ввод");
+        }
+
+        if (int_start_time < 0) {
+
+          oled.setCursor(10, 7);
+          oled.print(F("ERROR! start time < 0 "));
+          Serial.println("ошибка");
+          oled.update();
+          start_time = startTimemenu[pointer - 2];
+          ;
+          int_start_time = startTimemenu[pointer - 2];
+          ;
+          delay(2000);
+          oled.clear(1, 64, 127, 55);
+          oled.update();
+          oled.setCursor(30, 7);
+          oled.print(F("Try again"));
+          oled.setCursor(70, 4);
+          oled.print(start_time);
+          oled.update();
+          Serial.println("повторнный ввод");
+        }
+
+
+
+
+        Serial.print("часы:");
+        Serial.println(int_start_time);
+
+        oled.setCursor(70, 4);
+        oled.print(int_start_time);
+
+        oled.update();
+      }
+    }
+  }
+}
+
+void modify4(void) {
+
+  flag = 0;
+
+
+
+  // start_time = startTimemenu[pointer - 2];
+  //end_time = endTimemenu[pointer - 2];
+  // int_start_time = startTimemenu[pointer - 2];
+  //int_end_time = endTimemenu[pointer - 2];
+
+  start_time = "";
+  end_time = "";
+  int_start_time = 1;
+  int_end_time = 1;
+
+  oled.clear();
+  oled.update();
+  oled.home();
+  oled.setCursor(10, 0);
+  oled.print(F("Press # to return"));
+  oled.setCursor(10, 1);
+  oled.print(F("Press * to save"));
+  oled.setCursor(0, 3);
+  oled.print(F("Profile ID : "));
+  oled.setCursor(70, 3);
+  oled.print(idmenu[pointer - 2]);
+  oled.setCursor(0, 4);
+  oled.print(F("Start time:"));
+  oled.setCursor(70, 4);
+  oled.print(startTimemenu[pointer - 2]);
+  oled.setCursor(0, 5);
+  oled.print(F("End time:"));
+  oled.setCursor(70, 5);
+  oled.print(endTimemenu[pointer - 2]);
+  oled.update();
+
+
+  while (1) {
+    char key = keypad.getKey();
+
+
+
+
+
+    if (key != NO_KEY) {
+      Serial.println(key);
+
+
+
+      if (key == '#') {
+        printMenu();
+        wificonnectdata();
+        back = 2;
+
+        return;
+      }
+
+
+      if (key == '*') {
+
+        int_start_time = start_time.toInt();
+        start_time_lenght = start_time.length();
+
+
+        Serial.println("Часы записаны");
+        Serial.println(int_start_time);
+
+        oled.setCursor(70, 4);
+        oled.print(int_start_time);
+
+
+        oled.setCursor(0, 7);
+        oled.print(F("start time saved!"));
+
+        oled.update();
+
+
+        while (1) {
+          char key = keypad.getKey();
+
+          if (key != NO_KEY) {
+            Serial.println(key);
+
+
+            if (key == '*') {
+
+              int_end_time = end_time.toInt();
+              end_time_lenght = end_time.length();
+
+
+              Serial.println("минуты записаны");
+              Serial.println(int_end_time);
+
+
+
+              oled.setCursor(70, 5);
+              oled.print(int_end_time);
+
+              oled.setCursor(0, 7);
+              oled.print(F("end_ime saved!"));
+
+              oled.update();
+              delay(500);
+              modify_profile();
+
+              while (1) {
+                char key = keypad.getKey();
+
+                if (key != NO_KEY) {
+                  Serial.println(key);
+                }
+                if (key == '#') {
+                  printMenu();
+                  wificonnectdata();
+                  back = 2;
+                  return;
+                }
+              }
+            }
+
+            if (key == '#') {
+              printMenu();
+              wificonnectdata();
+              back = 2;
+              return;
+
+            } else {
+              Serial.println(key);
+
+              end_time += key;
+              int_end_time = end_time.toInt();
+
+
+              oled.clear(1, 64, 127, 55);
+              oled.clear(70, 5 * 8, 127, 6 * 8);
+              oled.update();
+
+              if (int_end_time > 86400) {
+
+                oled.setCursor(10, 7);
+                oled.print(F("ERROR! min > 60 "));
+                Serial.println("ошибка");
+                oled.update();
+                end_time = endTimemenu[pointer - 2];
+                int_end_time = endTimemenu[pointer - 2];
+                delay(2000);
+                oled.clear(1, 64, 127, 55);
+                oled.update();
+                oled.setCursor(30, 7);
+                oled.print(F("Try again"));
+                oled.setCursor(70, 5);
+                oled.print(end_time);
+                oled.update();
+                Serial.println("повторнный ввод");
+              }
+
+              if (int_end_time < 0) {
+
+                oled.setCursor(10, 7);
+                oled.print(F("ERROR! end time < 0 "));
+                Serial.println("ошибка");
+                oled.update();
+                end_time = endTimemenu[pointer - 2];
+                int_end_time = endTimemenu[pointer - 2];
+                delay(2000);
+                oled.clear(1, 64, 127, 55);
+                oled.update();
+                oled.setCursor(30, 7);
+                oled.print(F("Try again"));
+                oled.setCursor(70, 5);
+                oled.print(end_time);
+                oled.update();
+                Serial.println("повторнный ввод");
+              }
+
+
+              Serial.print("минуты:");
+              Serial.println(int_end_time);
+
+              oled.setCursor(70, 5);
+              oled.print(int_end_time);
+
+              oled.update();
+            }
+          }
+        }
+
+      } else {
+        start_time += key;
+        int_start_time = start_time.toInt();
+
+
+
+
+        oled.clear(1, 64, 127, 55);
+        oled.clear(70, 4 * 8, 127, 5 * 8);
+        oled.update();
+
+
+
+        if (int_start_time > 86400) {
+
+          oled.setCursor(10, 7);
+          oled.print(F("ERROR! time > 24 "));
+          Serial.println("ошибка");
+          oled.update();
+          start_time = startTimemenu[pointer - 2];
+          ;
+          int_start_time = startTimemenu[pointer - 2];
+          ;
+          delay(2000);
+          oled.clear(1, 64, 127, 55);
+          oled.update();
+          oled.setCursor(30, 7);
+          oled.print(F("Try again"));
+          oled.setCursor(70, 4);
+          oled.print(start_time);
+          oled.update();
+          Serial.println("повторнный ввод");
+        }
+
+        if (int_start_time < 0) {
+
+          oled.setCursor(10, 7);
+          oled.print(F("ERROR! start time < 0 "));
+          Serial.println("ошибка");
+          oled.update();
+          start_time = startTimemenu[pointer - 2];
+          ;
+          int_start_time = startTimemenu[pointer - 2];
+          ;
+          delay(2000);
+          oled.clear(1, 64, 127, 55);
+          oled.update();
+          oled.setCursor(30, 7);
+          oled.print(F("Try again"));
+          oled.setCursor(70, 4);
+          oled.print(start_time);
+          oled.update();
+          Serial.println("повторнный ввод");
+        }
+
+
+
+
+        Serial.print("часы:");
+        Serial.println(int_start_time);
+
+        oled.setCursor(70, 4);
+        oled.print(int_start_time);
+
+        oled.update();
+      }
+    }
+  }
+}
+
+
+void modify_profile() {
+  StaticJsonDocument<200> jsonDoc;
+
+  jsonDoc["id"] = idmenu[pointer - 2];
+  jsonDoc["start_time"] = int_start_time;
+  jsonDoc["end_time"] = int_end_time;
+
+  String jsonString;
+
+  serializeJson(jsonDoc, jsonString);
+  Serial.println(jsonString);
+
+  // Отправка PUT-запроса на сервер
+  HTTPClient http;
+  http.begin(serverUrlmodify);
+  http.addHeader("Content-Type", "application/json");
+
+  int httpResponseCode = http.sendRequest("PUT", jsonString);
+
+  if (httpResponseCode > 0) {
+    String response = http.getString();
+    Serial.println("Server response: " + response);
+
+    oled.setCursor(10, 6);
+    oled.print("Server response: ");
+    oled.setCursor(10, 7);
+    oled.print(response);
+    oled.update();
+
+  } else {
+    Serial.println("Error sending PUT request");
+  }
+
+  http.end();
+}
+
 
 void add(void) {
 
